@@ -1,0 +1,26 @@
+import type { PdfTool, ToolOption } from "@workspace/api-zod";
+
+const select = (key: string, label: string, defaultValue: string, values: string[]): ToolOption =>
+  ({ key, label, type: "select", defaultValue, description: "", choices: values.map(value => ({ value, label: value })) });
+const sheet: ToolOption = { key: "sheet", label: "Worksheet name (blank = all)", type: "text", defaultValue: "", description: "Exact worksheet name; leave blank for all sheets.", choices: [] };
+const header = select("header", "Keep first row as a header", "yes", ["yes", "no"]);
+const duplicateColumns: ToolOption = { key: "columns", label: "Match column numbers (blank = all)", type: "text", defaultValue: "", description: "Comma-separated column numbers, starting at 1: A = 1, B = 2. For example, 1,3 compares A and C. Each column must exist in every selected worksheet.", choices: [] };
+const duplicateKeep: ToolOption = { key: "keep", label: "Which duplicate row to keep", type: "select", defaultValue: "first", description: "First or last means its original position, not a date sort. Retained rows stay in their original order.", choices: [{ value: "first", label: "Keep first occurrence" }, { value: "last", label: "Keep last occurrence" }] };
+const definitions: [string, string, string, string, string, boolean, ToolOption[], string][] = [
+  ["merge-excel", "Merge Excel Workbooks", "Combine worksheets from multiple XLSX files into one workbook.", "Excel organization", ".xlsx", true, [], "Duplicate worksheet names are renamed and internal sheet references updated. Named ranges, tables, charts, images and advanced formulas are rejected rather than silently lost."],
+  ["split-excel", "Split Excel Worksheets", "Download each worksheet as its own XLSX workbook in a ZIP.", "Excel organization", ".xlsx", false, [sheet], "Sheets with cross-sheet formulas cannot be split safely and are rejected. Named ranges, tables, charts and images are unsupported."],
+  ["excel-to-csv", "Excel to CSV", "Export selected worksheets as UTF-8 CSV files in a ZIP.", "Excel conversion", ".xlsx", false, [sheet, select("values", "Formula output", "cached", ["cached", "formula"]), select("delimiter", "CSV delimiter", "comma", ["comma", "semicolon", "tab"])], "Cached values may be stale or unavailable. Formula text is exported as safe literal text, not executable CSV formulas. Formatting is not retained."],
+  ["csv-to-excel", "CSV to Excel", "Convert UTF-8 CSV data to a real XLSX workbook with literal text cells.", "Excel conversion", ".csv", false, [select("delimiter", "CSV delimiter", "comma", ["comma", "semicolon", "tab"])], "Every CSV field remains text, including leading zeroes and formula-like values. UTF-8 only; legacy XLS and macros are not accepted."],
+  ["remove-excel-duplicates", "Remove Duplicate Excel Rows", "Remove repeated rows using all cells or selected columns, keeping the first or last occurrence.", "Excel cleanup", ".xlsx", false, [sheet, header, duplicateColumns, duplicateKeep], "Matching is exact and type-sensitive; text, numbers and booleans differ. Case and whitespace are not normalized. Repeated empty keys are duplicates too. Headers are excluded when enabled; each worksheet is matched separately. Row-removing tools reject formula workbooks, merged cells, filters, print areas, validation and advanced structures to avoid broken references."],
+  ["remove-excel-empty-rows", "Remove Empty Excel Rows", "Remove rows whose cells are blank or whitespace-only.", "Excel cleanup", ".xlsx", false, [sheet, header], "Zero and false are not empty. Row-removing tools reject formula workbooks, merged cells, filters, print areas, validation and advanced structures to avoid broken references."],
+  ["trim-excel-text", "Trim Excel Cell Text", "Remove leading and trailing whitespace from text cells without changing formulas.", "Excel cleanup", ".xlsx", false, [sheet], "Formula cells and numeric cells stay unchanged. Text that begins with = remains literal text. Named ranges, tables, charts and images are unsupported; advanced workbook features may not round-trip exactly."],
+  ["excel-statistics", "Excel Workbook Statistics", "Inspect sheet sizes, populated cells, formula counts and workbook totals.", "Excel inspection", ".xlsx", false, [], "Counts refer to stored cells, not recalculated formula results. Formulas and macros are never executed."],
+  ["excel-to-json", "Excel to JSON", "Extract worksheet rows with explicit formula and cached-value records.", "Excel conversion", ".xlsx", false, [sheet], "Formula cells contain separate formula and cachedValue fields; missing caches are null. Dates use ISO strings; empty cells are null."],
+];
+export const excelTools: PdfTool[] = definitions.map(([slug, name, description, category, accept, multiple, options, limitations]) => ({
+  slug, name, description, category, accept, multiple, options, limitations, section: "excel",
+  icon: "Table", engine: "Local openpyxl processing", popular: ["merge-excel", "csv-to-excel", "excel-to-csv"].includes(slug),
+  help: ["Choose XLSX or UTF-8 CSV files. Uploads are processed temporarily on KTAS servers, not by external APIs.",
+    "Review the limitations. Formulas are never evaluated; saving XLSX clears existing formula caches.",
+    "Download the result and review it in a spreadsheet editor. Keep your original workbook."],
+}));

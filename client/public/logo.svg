@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 56" role="img" aria-labelledby="title">
+  <title id="title">KTAS Tools</title>
+  <rect x="2" y="2" width="52" height="52" rx="10" fill="#087d78"/>
+  <path d="M15 12h22v4H15zm0 10h22v4H15zm0 10h14v4H15z" fill="#f4f8f2"/>
+  <path d="M39 31l7 7-7 7" fill="none" stroke="#d4ec73" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="67" y="27" fill="#153b3b" font-family="DM Sans, sans-serif" font-size="20" font-weight="700" letter-spacing="-1">KTAS</text>
+  <text x="67" y="45" fill="#087d78" font-family="DM Sans, sans-serif" font-size="15" font-weight="700">TOOLS</text>
+</svg>

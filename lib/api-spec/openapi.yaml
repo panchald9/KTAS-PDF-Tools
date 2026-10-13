@@ -1,0 +1,592 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+paths:
+  /workbooks/inspect:
+    post:
+      operationId: inspectWorkbook
+      tags: [tools]
+      description: Temporarily inspect a plain XLSX using the existing worker limits. No formulas or macros are executed. Lists up to 100 sheets and previews only the requested sheet (first sheet by default), at most 10 rows including the first-row header candidate, 12 columns and 500 characters per cell field. No document history is stored.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WorkbookInspectionInput" }
+      responses:
+        "200":
+          description: Bounded worksheet metadata and sample
+          headers:
+            Cache-Control:
+              schema: { type: string }
+              description: no-store
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WorkbookInspection" }
+        "400":
+          description: Invalid, unsupported or over-limit workbook or unknown sheet
+        "429":
+          description: Rate limit or worker capacity reached
+        "408":
+          description: Worker time limit exceeded
+        "503":
+          description: Inspection unavailable
+  /admin/session:
+    get:
+      operationId: getAdminSession
+      tags: [admin]
+      responses:
+        "200":
+          description: Verified owner session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSession"
+        "401": { description: Sign in required }
+        "403": { description: Owner access required }
+  /admin/tools:
+    get:
+      operationId: getAdminTools
+      tags: [admin]
+      responses:
+        "200":
+          description: All tools including disabled tools
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/ManagedTool" } }
+  /admin/tools/{slug}:
+    parameters:
+      - { name: slug, in: path, required: true, schema: { type: string } }
+    put:
+      operationId: saveAdminTool
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ToolSettingsInput" }
+      responses:
+        "200":
+          description: Saved tool
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ManagedTool" }
+    delete:
+      operationId: resetAdminTool
+      tags: [admin]
+      responses:
+        "200":
+          description: Original tool settings restored
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ManagedTool" }
+  /admin/advertising:
+    get:
+      operationId: getAdminAdvertising
+      tags: [admin]
+      responses:
+        "200":
+          description: Settings and all ad placements
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdvertisingConfig" }
+  /admin/settings:
+    put:
+      operationId: saveAdminSettings
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdminSettings" }
+      responses:
+        "200":
+          description: Saved website settings
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdminSettings" }
+  /admin/ads/{name}:
+    parameters:
+      - { name: name, in: path, required: true, schema: { type: string } }
+    put:
+      operationId: saveAdminAd
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AdPlacementInput" }
+      responses:
+        "200":
+          description: Saved placement
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdPlacement" }
+    delete:
+      operationId: deleteAdminAd
+      tags: [admin]
+      responses:
+        "204": { description: Placement configuration removed }
+  /admin/analytics:
+    get:
+      operationId: getAdminAnalytics
+      tags: [admin]
+      parameters:
+        - { name: days, in: query, schema: { type: integer, enum: [7, 30], default: 30 } }
+      responses:
+        "200":
+          description: Consented traffic totals and breakdowns
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AnalyticsReport" }
+    delete:
+      operationId: clearAdminAnalytics
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AnalyticsDeletionInput" }
+      responses:
+        "204": { description: Visitor records permanently removed }
+  /admin/visitors:
+    get:
+      operationId: getAdminVisitors
+      tags: [admin]
+      parameters:
+        - { name: days, in: query, schema: { type: integer, enum: [7, 30], default: 30 } }
+        - { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+      responses:
+        "200":
+          description: Paginated private page view records
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VisitorPage" }
+  /public-config:
+    get:
+      operationId: getPublicConfig
+      tags: [tools]
+      responses:
+        "200":
+          description: Public ad and analytics configuration
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AdvertisingConfig" }
+  /analytics/pageview:
+    post:
+      operationId: trackPageView
+      tags: [analytics]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PageViewInput" }
+      responses:
+        "204": { description: Consented page view accepted }
+  /tools:
+    get:
+      operationId: listTools
+      tags: [tools]
+      responses:
+        "200":
+          description: Document tool catalog
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PdfTool"
+  /site-config:
+    get:
+      operationId: getSiteConfig
+      tags: [tools]
+      responses:
+        "200":
+          description: Public limits and advertising configuration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteConfig"
+  /documents/inspect:
+    post:
+      operationId: inspectDocument
+      tags: [tools]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentInspectionInput"
+      responses:
+        "200":
+          description: Actual PDF pages and form fields
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentInspection"
+        "400":
+          description: Invalid file or password
+  /tools/{slug}/process:
+    post:
+      operationId: processDocument
+      tags: [tools]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DocumentProcessingInput"
+      responses:
+        "200":
+          description: Validated outputs from actual processing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentProcessingResult"
+        "400":
+          description: Invalid file or options
+        "429":
+          description: Processing limit reached
+        "503":
+          description: Required engine unavailable
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+components:
+  schemas:
+    AdminSession:
+      type: object
+      required: [userId, role]
+      properties:
+        userId: { type: string }
+        role: { type: string, enum: [owner] }
+    ToolSettingsInput:
+      type: object
+      required: [name, description, enabled, popular]
+      additionalProperties: false
+      properties:
+        name: { type: string, minLength: 1, maxLength: 90 }
+        description: { type: string, minLength: 1, maxLength: 600 }
+        enabled: { type: boolean }
+        popular: { type: boolean }
+    ManagedTool:
+      allOf:
+        - { $ref: "#/components/schemas/PdfTool" }
+        - type: object
+          required: [enabled, popular]
+          properties:
+            enabled: { type: boolean }
+            popular: { type: boolean }
+    AdminSettings:
+      type: object
+      required: [adsEnabled, adsPublisherId, analyticsEnabled]
+      additionalProperties: false
+      properties:
+        adsEnabled: { type: boolean }
+        adsPublisherId: { type: string, pattern: "^$|^ca-pub-[0-9]{16}$" }
+        analyticsEnabled: { type: boolean }
+    AdPlacementInput:
+      type: object
+      required: [enabled, type, title, text, link, imageUrl, adUnit]
+      additionalProperties: false
+      properties:
+        enabled: { type: boolean }
+        type: { type: string, enum: [sponsor, adsense] }
+        title: { type: string, maxLength: 100 }
+        text: { type: string, maxLength: 240 }
+        link: { type: string, maxLength: 2048 }
+        imageUrl: { type: string, maxLength: 2048 }
+        adUnit: { type: string, pattern: "^$|^[0-9]{10}$" }
+    AdPlacement:
+      allOf:
+        - { $ref: "#/components/schemas/AdPlacementInput" }
+        - type: object
+          required: [name]
+          properties:
+            name: { type: string }
+    AdvertisingConfig:
+      type: object
+      required: [settings, slots]
+      properties:
+        settings: { $ref: "#/components/schemas/AdminSettings" }
+        slots: { type: array, items: { $ref: "#/components/schemas/AdPlacement" } }
+    AnalyticsDeletionInput:
+      type: object
+      required: [confirm]
+      properties:
+        confirm: { type: string, enum: [DELETE] }
+    PageViewInput:
+      type: object
+      required: [id, visitorId, path, consent]
+      additionalProperties: false
+      properties:
+        id: { type: string, format: uuid }
+        visitorId: { type: string, format: uuid }
+        path: { type: string, minLength: 1, maxLength: 180 }
+        referrer: { type: string, maxLength: 2048 }
+        consent: { type: boolean, enum: [true] }
+    TrafficTotals:
+      type: object
+      required: [views, visitors, todayViews, todayVisitors]
+      properties:
+        views: { type: integer }
+        visitors: { type: integer }
+        todayViews: { type: integer }
+        todayVisitors: { type: integer }
+    DailyTraffic:
+      type: object
+      required: [date, views, visitors]
+      properties:
+        date: { type: string }
+        views: { type: integer }
+        visitors: { type: integer }
+    TrafficBreakdown:
+      type: object
+      required: [label, views, visitors]
+      properties:
+        label: { type: string }
+        views: { type: integer }
+        visitors: { type: integer }
+    AnalyticsReport:
+      type: object
+      required: [totals, daily, countries, devices, operatingSystems, browsers, pages, referrers, timezone, retentionDays]
+      properties:
+        totals: { $ref: "#/components/schemas/TrafficTotals" }
+        daily: { type: array, items: { $ref: "#/components/schemas/DailyTraffic" } }
+        countries: { type: array, items: { $ref: "#/components/schemas/TrafficBreakdown" } }
+        devices: { type: array, items: { $ref: "#/components/schemas/TrafficBreakdown" } }
+        operatingSystems: { type: array, items: { $ref: "#/components/schemas/TrafficBreakdown" } }
+        browsers: { type: array, items: { $ref: "#/components/schemas/TrafficBreakdown" } }
+        pages: { type: array, items: { $ref: "#/components/schemas/TrafficBreakdown" } }
+        referrers: { type: array, items: { $ref: "#/components/schemas/TrafficBreakdown" } }
+        timezone: { type: string }
+        retentionDays: { type: integer }
+    VisitorRecord:
+      type: object
+      required: [id, path, ip, country, device, os, browser, referrer, createdAt]
+      properties:
+        id: { type: string }
+        path: { type: string }
+        ip: { type: string }
+        country: { type: string }
+        device: { type: string }
+        os: { type: string }
+        browser: { type: string }
+        referrer: { type: string }
+        createdAt: { type: string }
+    VisitorPage:
+      type: object
+      required: [records, total, page, pageSize]
+      properties:
+        records: { type: array, items: { $ref: "#/components/schemas/VisitorRecord" } }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+    PdfTool:
+      type: object
+      # Public listings omit disabled tools; popular is an owner-managed shortcut flag.
+      required: [slug, name, description, category, icon, accept, multiple, engine, options, help, limitations]
+      properties:
+        section: { type: string, enum: [pdf, image, text, word, excel] }
+        popular: { type: boolean }
+        slug: { type: string }
+        name: { type: string }
+        description: { type: string }
+        category: { type: string }
+        icon: { type: string }
+        accept: { type: string }
+        multiple: { type: boolean }
+        engine: { type: string }
+        options:
+          type: array
+          items: { $ref: "#/components/schemas/ToolOption" }
+        help:
+          type: array
+          items: { type: string }
+        limitations: { type: string }
+    ToolOption:
+      type: object
+      required: [key, label, type, defaultValue, description, choices]
+      properties:
+        key: { type: string }
+        label: { type: string }
+        type: { type: string, enum: [text, number, password, textarea, select, signature, formFields] }
+        defaultValue: { type: string }
+        description: { type: string }
+        choices:
+          type: array
+          items: { $ref: "#/components/schemas/OptionChoice" }
+    OptionChoice:
+      type: object
+      required: [value, label]
+      properties:
+        value: { type: string }
+        label: { type: string }
+    SiteConfig:
+      type: object
+      required: [maxFileBytes, maxTotalBytes, maxFiles, maxPages, adsEnabled, publisherId, adSlots, aiEnabled, retention]
+      properties:
+        maxFileBytes: { type: integer }
+        maxTotalBytes: { type: integer }
+        maxFiles: { type: integer }
+        maxPages: { type: integer }
+        adsEnabled: { type: boolean }
+        publisherId: { type: ["string", "null"] }
+        adSlots:
+          type: object
+          additionalProperties: { type: string }
+        aiEnabled: { type: boolean }
+        retention: { type: string }
+    DocumentFileInput:
+      type: object
+      required: [name, dataBase64]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        dataBase64: { type: string, minLength: 1 }
+    DocumentProcessingInput:
+      type: object
+      required: [files, options]
+      properties:
+        files:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items: { $ref: "#/components/schemas/DocumentFileInput" }
+        options:
+          type: object
+          additionalProperties: { type: string }
+    DocumentInspectionInput:
+      type: object
+      required: [file]
+      properties:
+        file: { $ref: "#/components/schemas/DocumentFileInput" }
+        password: { type: string }
+    WorkbookInspectionInput:
+      type: object
+      required: [file]
+      properties:
+        file: { $ref: "#/components/schemas/DocumentFileInput" }
+        sheet: { type: string, maxLength: 31 }
+    WorkbookSheet:
+      type: object
+      required: [name, rows, columns, state]
+      properties:
+        name: { type: string }
+        rows: { type: integer }
+        columns: { type: integer }
+        state: { type: string, enum: [visible, hidden, veryHidden] }
+    WorkbookPreviewCell:
+      type: object
+      required: [coordinate, kind, value, formula, cachedValue, truncated]
+      properties:
+        coordinate: { type: string }
+        kind: { type: string, enum: [value, formula] }
+        value: { type: ["string", "null"], maxLength: 500 }
+        formula: { type: ["string", "null"], maxLength: 500 }
+        cachedValue: { type: ["string", "null"], maxLength: 500 }
+        truncated: { type: boolean }
+    WorkbookInspection:
+      type: object
+      required: [sheets, previewSheet, sampleRows, rowLimit, columnLimit, cellCharacterLimit, truncated, warnings]
+      properties:
+        sheets:
+          type: array
+          maxItems: 100
+          items: { $ref: "#/components/schemas/WorkbookSheet" }
+        previewSheet: { type: string }
+        sampleRows:
+          type: array
+          maxItems: 10
+          items:
+            type: array
+            maxItems: 12
+            items: { $ref: "#/components/schemas/WorkbookPreviewCell" }
+        rowLimit: { type: integer }
+        columnLimit: { type: integer }
+        cellCharacterLimit: { type: integer }
+        truncated: { type: boolean }
+        warnings: { type: array, items: { type: string } }
+    DocumentInspection:
+      type: object
+      required: [pageCount, encrypted, pages, formFields]
+      properties:
+        pageCount: { type: integer }
+        encrypted: { type: boolean }
+        pages:
+          type: array
+          items: { $ref: "#/components/schemas/DocumentPage" }
+        formFields:
+          type: array
+          items: { $ref: "#/components/schemas/DocumentFormField" }
+    DocumentPage:
+      type: object
+      required: [number, width, height, rotation, previewBase64]
+      properties:
+        number: { type: integer }
+        width: { type: number }
+        height: { type: number }
+        rotation: { type: integer }
+        previewBase64: { type: string }
+    DocumentFormField:
+      type: object
+      required: [name, value, type, page]
+      properties:
+        name: { type: string }
+        value: { type: string }
+        type: { type: string }
+        page: { type: integer }
+    DocumentOutput:
+      type: object
+      required: [name, mimeType, dataBase64, bytes]
+      properties:
+        name: { type: string }
+        mimeType: { type: string }
+        dataBase64: { type: string }
+        bytes: { type: integer }
+    DocumentProcessingResult:
+      type: object
+      required: [files, message, warnings, originalBytes, outputBytes, pageCount, text]
+      properties:
+        files:
+          type: array
+          items: { $ref: "#/components/schemas/DocumentOutput" }
+        message: { type: string }
+        warnings:
+          type: array
+          items: { type: string }
+        originalBytes: { type: integer }
+        outputBytes: { type: integer }
+        pageCount: { type: integer }
+        text: { type: string }
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+

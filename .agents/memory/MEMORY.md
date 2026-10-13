@@ -1,0 +1,5 @@
+- [Processing and business rules](processing-policy.md) — KTAS Tools at ktastools.com; growing PDF/Word/image/text toolkit, local processing, free AdSense-funded model; no publishing without approval.
+- [PDF form integrity](pdf-form-integrity.md) — verify stored field values after reopening, not only visible appearances, when clearing forms.
+- [Catalog browsing and search](catalog-search.md) — popular shortcuts first, complete category lists below, and search across all tools regardless of the selected tab.
+- [Owner administration](owner-admin-policy.md) — private management and real visitor reports; renewed tracking consent, 30-day retention and approximate local geolocation.
+- [Spreadsheet integrity](excel-integrity.md) — formulas versus caches, literal CSV inputs, and explicit refusal rather than broken workbook dependencies.

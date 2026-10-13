@@ -1,0 +1,105 @@
+kind = "web"
+previewPath = "/"
+title = "KTAS Tools"
+description = "Free PDF, image and text tools on one website, with local processing, shared owner administration, consented visitor reports and ad management."
+version = "1.0.0"
+id = "artifacts/ktas-pdf"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24818
+
+[services.development]
+run = "pnpm --filter @workspace/ktas-pdf run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ktas-pdf", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/ktas-pdf/dist/public"
+
+[[services.production.rewrites]]
+from = "/pdf"
+to = "/pdf/index.html"
+
+[[services.production.rewrites]]
+from = "/image"
+to = "/image/index.html"
+
+[[services.production.rewrites]]
+from = "/text"
+to = "/text/index.html"
+
+[[services.production.rewrites]]
+from = "/tools"
+to = "/tools/index.html"
+
+[[services.production.rewrites]]
+from = "/guides"
+to = "/guides/index.html"
+
+[[services.production.rewrites]]
+from = "/about"
+to = "/about/index.html"
+
+[[services.production.rewrites]]
+from = "/contact"
+to = "/contact/index.html"
+
+[[services.production.rewrites]]
+from = "/privacy"
+to = "/privacy/index.html"
+
+[[services.production.rewrites]]
+from = "/terms"
+to = "/terms/index.html"
+
+[[services.production.rewrites]]
+from = "/cookie-policy"
+to = "/cookie-policy/index.html"
+
+[[services.production.rewrites]]
+from = "/pdf/*"
+to = "/pdf/*/index.html"
+
+[[services.production.rewrites]]
+from = "/image/*"
+to = "/image/*/index.html"
+
+[[services.production.rewrites]]
+from = "/text/*"
+to = "/text/*/index.html"
+
+[[services.production.rewrites]]
+from = "/guides/*"
+to = "/guides/*/index.html"
+
+[[services.production.rewrites]]
+from = "/admin"
+to = "/admin/index.html"
+
+[[services.production.rewrites]]
+from = "/sign-in"
+to = "/sign-in/index.html"
+
+[[services.production.rewrites]]
+from = "/sign-up"
+to = "/sign-up/index.html"
+
+[[services.production.rewrites]]
+from = "/sign-in/*"
+to = "/sign-in/index.html"
+
+
+[[services.production.rewrites]]
+from = "/sign-up/*"
+to = "/sign-up/index.html"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24818"
+BASE_PATH = "/"

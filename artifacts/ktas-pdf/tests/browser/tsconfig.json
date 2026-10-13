@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["./**/*.ts", "./**/*.tsx", "../../src/**/*"],
+  "exclude": ["test-results", "playwright-report"],
+  "compilerOptions": { "incremental": false, "noEmit": true },
+  "references": [{ "path": "../../../../lib/api-client-react" }]
+}

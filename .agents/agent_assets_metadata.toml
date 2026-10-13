@@ -1,0 +1,47 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "u_TPJ3Yr8_N7lQfGiCGe2"
+uri = "file://.local/conversation-workspace/files/audit/final-report.pdf"
+type = "pdf"
+title = "KTAS PDF Tools — Final Audit Report"
+description = "10-page report covering all 32 tools, observed failures, evidence and prioritized fixes. Tested 3 October 2026."
+logical_id = "f7b9b2b8-0c8d-418f-a68a-248b91e404f3"
+content_hash = "sha256:40005f637edd67c4e047f3c9d021a7128a40368be5420fc110b7cc189d63d382"
+size = 435533
+mtime_ms = 1790994917179
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/conversation:ddbae42f-f963-49e6-a14c-3aa5a9275c01/f7b9b2b8-0c8d-418f-a68a-248b91e404f3/d9f093e2-f124-4921-a0cc-01ce9467cd88"
+storage_version_token = "1790994968534722"
+content_type = "application/pdf"
+source_uri = "file://audit/final-report.pdf"
+
+[[outputs]]
+id = "rgwkoQ96Kjlc9DxHEeZ2z"
+uri = "file://.local/conversation-workspace/files/audit/final-report.html"
+type = "html"
+title = "Interactive Audit Report"
+description = "Complete report with expandable evidence from all 46 test scenarios."
+logical_id = "06e1e1fa-ab1c-45e5-ac25-357a20b0a754"
+content_hash = "sha256:519c58b5a8802ec118e026492e960a6fd14e021d432c237256927b40bcb46e6e"
+size = 669279
+mtime_ms = 1790994914503
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/conversation:ddbae42f-f963-49e6-a14c-3aa5a9275c01/06e1e1fa-ab1c-45e5-ac25-357a20b0a754/8907780e-aee3-4214-a43b-65d23bd5ab84"
+storage_version_token = "1790994969837105"
+content_type = "text/html"
+source_uri = "file://audit/final-report.html"
+
+[[outputs]]
+id = "PmapnkGjoMNeuZK8Jzhcy"
+uri = "file://.local/conversation-workspace/files/audit/tool-results.csv"
+type = "table"
+title = "Tool Results Checklist"
+description = "Spreadsheet-ready list of all 32 tools, status, observed result and recommended repair."
+logical_id = "7b03c97d-4b77-4e86-b735-53414ed2b229"
+content_hash = "sha256:69c6ab86a6e5ddf29523678c84b39cdc10568c387a52cd87e843d31003658825"
+size = 9701
+mtime_ms = 1790994914379
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/conversation:ddbae42f-f963-49e6-a14c-3aa5a9275c01/7b03c97d-4b77-4e86-b735-53414ed2b229/05e4d1df-2b5b-4a4f-a410-12f012e91c8c"
+storage_version_token = "1790994970943405"
+content_type = "text/csv"
+source_uri = "file://audit/tool-results.csv"

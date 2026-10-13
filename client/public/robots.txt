@@ -1,0 +1,6 @@
+User-agent: *
+Sitemap: https://ktastools.com/sitemap.xml
+Allow: /
+Disallow: /admin
+Disallow: /sign-in
+Disallow: /sign-up
