@@ -1,6 +1,8 @@
-import { DatabaseSync } from "node:sqlite";
 import path from "node:path";
 import fs from "node:fs";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
 
 const dataDir = path.resolve(process.cwd(), "data");
 if (!fs.existsSync(dataDir)) {
@@ -8,7 +10,41 @@ if (!fs.existsSync(dataDir)) {
 }
 
 const dbPath = path.join(dataDir, "ktas.db");
-export const db = new DatabaseSync(dbPath);
+
+interface SqliteStatement {
+  all(...params: any[]): any[];
+  get(...params: any[]): any;
+  run(...params: any[]): any;
+}
+
+export interface SqliteDb {
+  exec(sql: string): void;
+  prepare(sql: string): SqliteStatement;
+}
+
+function initDatabase(filePath: string): SqliteDb {
+  // Try built-in node:sqlite (Node 22+)
+  try {
+    const nodeSqlite = require("node:sqlite");
+    if (nodeSqlite && nodeSqlite.DatabaseSync) {
+      return new nodeSqlite.DatabaseSync(filePath) as SqliteDb;
+    }
+  } catch {
+    // node:sqlite not available on Node 20 / older engines
+  }
+
+  // Fallback to better-sqlite3 (Node 20, 18, etc.)
+  try {
+    const BetterSqlite = require("better-sqlite3");
+    return new BetterSqlite(filePath) as SqliteDb;
+  } catch (err) {
+    throw new Error(
+      "No SQLite driver available. Please run `npm install better-sqlite3` or use Node.js 22+."
+    );
+  }
+}
+
+export const db: SqliteDb = initDatabase(dbPath);
 
 // Initialize schema
 db.exec(`
