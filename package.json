@@ -4,7 +4,7 @@
   "description": "KTAS Tools - Free PDF, Word, Excel, Image and Text Toolkit (Fullstack Node.js)",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n \"SERVER,CLIENT\" -c \"blue,green\" \"npm run dev:server\" \"npm run dev:client\"",
+    "dev": "concurrently -k -n \"SERVER,CLIENT\" -c \"blue,green\" \"tsx watch server/index.ts\" \"vite --config client/vite.config.ts client\"",
     "dev:server": "tsx watch server/index.ts",
     "dev:client": "vite --config client/vite.config.ts client",
     "build": "npm run build:client",

@@ -46,6 +46,14 @@ function initDatabase(filePath: string): SqliteDb {
 
 export const db: SqliteDb = initDatabase(dbPath);
 
+export function closeDatabase(): void {
+  try {
+    if (typeof (db as any).close === "function") {
+      (db as any).close();
+    }
+  } catch {}
+}
+
 // Initialize schema
 db.exec(`
   CREATE TABLE IF NOT EXISTS tool_settings (
