@@ -60,8 +60,8 @@ The server will start at `http://localhost:5000` and serve both the REST API and
 |---|---|
 | `npm install` | Install all backend and frontend dependencies |
 | `npm run dev` | Run backend and Vite dev servers concurrently |
-| `npm run dev:server` | Run only backend API server with watch mode (`tsx`) |
-| `npm run dev:client` | Run only Vite frontend dev server |
+| `npm run backend` (or `npm run dev:server`) | Run **only** backend API server (port 5000) |
+| `npm run frontend` (or `npm run dev:client`) | Run **only** Vite frontend dev server (port 3000) |
 | `npm run build` | Build the frontend for production |
 | `npm start` | Start the production server on port 5000 |
 
