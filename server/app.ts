@@ -17,8 +17,9 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 // Mount all API routes
 app.use("/api", router);
 
-// Serve static frontend in production (or when built)
-const clientDist = path.resolve(process.cwd(), "client/dist");
+const clientDist = fs.existsSync(path.resolve(process.cwd(), "client/dist"))
+  ? path.resolve(process.cwd(), "client/dist")
+  : path.resolve(import.meta.dirname, "../client/dist");
 if (fs.existsSync(clientDist)) {
   app.use(express.static(clientDist));
   app.get("*", (req, res, next) => {

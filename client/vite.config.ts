@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import { seoPlugin } from './seo-plugin';
 
-const port = Number(process.env.CLIENT_PORT || process.env.PORT || 3000);
+const port = Number(process.env.CLIENT_PORT || process.env.VITE_PORT || 3000);
 const basePath = process.env.BASE_PATH || '/';
 const apiTarget = process.env.API_TARGET || 'http://localhost:5000';
 

@@ -4,7 +4,11 @@ import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
 
-const dataDir = path.resolve(process.cwd(), "data");
+const dataDir = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : fs.existsSync(path.resolve(process.cwd(), "data"))
+  ? path.resolve(process.cwd(), "data")
+  : path.resolve(import.meta.dirname, "../../data");
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
